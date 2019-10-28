@@ -2,6 +2,7 @@ import express from 'express'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import config from 'config'
+import jwtAuthentication from '../middleware/auth'
 
 import User from '../models/User'
 
@@ -65,7 +66,7 @@ router.post(
 // @route    GET /api/auth
 // @desc     Get Logged in User
 // @access   Private
-router.get('/', (req, res) => {
+router.get('/', jwtAuthentication, (req, res) => {
   res.send('Get LoggedIn User')
 })
 
