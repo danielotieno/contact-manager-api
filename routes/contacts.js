@@ -1,13 +1,49 @@
 import express from 'express'
+import jwtAuthentication from '../middleware/auth'
+import Contact from '../models/Contact'
+
+const { check, validationResult } = require('express-validator')
 
 const router = express.Router()
 
 // @route    POST /api/contacts
 // @desc     Create a contact
 // @access   Private
-router.post('/', (req, res) => {
-  res.send('Create a contact')
-})
+router.post(
+  '/',
+  [
+    jwtAuthentication,
+    [
+      check('name', 'Name is required')
+        .not()
+        .isEmpty(),
+    ],
+  ],
+  async (req, res) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
+    }
+
+    const { name, email, phone, type } = req.body
+
+    try {
+      const newContact = new Contact({
+        name,
+        email,
+        phone,
+        type,
+        user: req.user.id,
+      })
+
+      const contact = await newContact.save()
+      res.json(contact)
+    } catch (err) {
+      console.log(err.message)
+      res.status(500).send('Server Error')
+    }
+  },
+)
 
 // @route    GET /api/contacts
 // @desc     Get all user contacts
