@@ -1,6 +1,7 @@
 import express from 'express'
 import jwtAuthentication from '../middleware/auth'
 import Contact from '../models/Contact'
+import User from '../models/User'
 
 const { check, validationResult } = require('express-validator')
 
@@ -48,8 +49,16 @@ router.post(
 // @route    GET /api/contacts
 // @desc     Get all user contacts
 // @access   Private
-router.get('/', (req, res) => {
-  res.send('Get all user contacts')
+router.get('/', jwtAuthentication, async (req, res) => {
+  try {
+    const contacts = await Contact.find({ user: req.user.id }).sort({
+      date: -1,
+    })
+    res.json(contacts)
+  } catch (err) {
+    console.log(err.message)
+    res.status(500).send('Server Error')
+  }
 })
 
 // @route    PUT /api/contacts:id
