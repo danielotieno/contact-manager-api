@@ -11,7 +11,7 @@ const Register = props => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      props.history.pus('/');
+      props.history.push('/');
     }
 
     if (error === 'User already exists') {
