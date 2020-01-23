@@ -2,19 +2,24 @@ import React, { useState, useContext, useEffect } from 'react';
 import AlertContext from '../../context/alert/alertContext';
 import AuthContext from '../../context/auth/authContext';
 
-const Register = () => {
+const Register = props => {
   const alertContext = useContext(AlertContext);
   const authContext = useContext(AuthContext);
 
   const { setAlert } = alertContext;
-  const { register, error, clearErros } = authContext;
+  const { register, error, clearErros, isAuthenticated } = authContext;
 
   useEffect(() => {
+    if (isAuthenticated) {
+      props.history.pus('/');
+    }
+
     if (error === 'User already exists') {
       setAlert(error, 'danger');
       clearErros();
     }
-  }, [clearErros, error, setAlert]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error, isAuthenticated, props.history]);
 
   const [user, setUser] = useState({
     name: '',
