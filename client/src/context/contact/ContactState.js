@@ -1,59 +1,42 @@
-import React, { useReducer } from "react";
-import uuid from "uuid";
-import contactContext from "./contactContext";
-import contactReducer from "./contactReducer";
+import React, { useReducer } from 'react';
+import axios from 'axios';
+import contactContext from './contactContext';
+import contactReducer from './contactReducer';
 import {
   ADD_CONTACT,
   DELETE_CONTACT,
   UPDATE_CONTACT,
+  CONTACT_ERROR,
   SET_CURRENT,
   CLEAR_CURRENT,
   FILTER_CONTACTS,
   CLEAR_FILTER
-} from "../types";
+} from '../types';
 
 const ContactState = props => {
   const initialState = {
-    contacts: [
-      {
-        id: 1,
-        name: "Daniel Otieno",
-        email: "da@gmail.com",
-        phone: "123-345-678",
-        type: "personal"
-      },
-      {
-        id: 2,
-        name: "Ritah Wekesa",
-        email: "ri@gmail.com",
-        phone: "145-345-678",
-        type: "professional"
-      },
-      {
-        id: 3,
-        name: "Moses Onyi",
-        email: "onyi@gmail.com",
-        phone: "123-678-678",
-        type: "personal"
-      },
-      {
-        id: 4,
-        name: "Ann Mburu",
-        email: "ann@gmail.com",
-        phone: "123-123-678",
-        type: "personal"
-      }
-    ],
+    contacts: [],
     current: null,
-    filtered: null
+    filtered: null,
+    error: null
   };
 
   const [state, dispatch] = useReducer(contactReducer, initialState);
 
   // ADD CONTACT
-  const addContact = contact => {
-    contact.id = uuid.v4();
-    dispatch({ type: ADD_CONTACT, payload: contact });
+  const addContact = async contact => {
+    const config = {
+      headers: {
+        'Content-type': 'application/json'
+      }
+    };
+    try {
+      const res = await axios.post('/api/contacts', contact, config);
+
+      dispatch({ type: ADD_CONTACT, payload: res.data });
+    } catch (error) {
+      dispatch({ type: CONTACT_ERROR, payload: error.response.message });
+    }
   };
 
   // DELETE CONTACT
@@ -92,6 +75,7 @@ const ContactState = props => {
         contacts: state.contacts,
         current: state.current,
         filtered: state.filtered,
+        error: state.error,
         addContact,
         updateContact,
         deleteContact,
